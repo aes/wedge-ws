@@ -115,3 +115,15 @@ Scenario: Increase vs tab
     xmefodo  bar
     remmoboar blef
     """
+
+Scenario: Increase vs end-of-line
+  When I insert:
+    """
+    moophlebistre
+    mooblof gog
+    xmkdcat dog
+    xmefodo
+    """
+  And I place the cursor before "gog"
+  And I press "C-c :"
+  Then I should not see pattern " +$"

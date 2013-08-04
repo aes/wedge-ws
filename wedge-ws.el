@@ -24,7 +24,10 @@
 
 (defun ws-at-pos (&optional pos)
   (let ((p (or pos (point))))
-    (eq 32 (char-syntax (aref (buffer-substring p (1+ p)) 0)))))
+    (if (not (eobp))
+	(let ((c (aref (buffer-substring p (1+ p)) 0)))
+	  (and (= 32 (char-syntax c))
+	       (not (= 10 c)))))))
 
 (defun wedge-ws-continue-p (col)
   (or (and (= (current-column) col)
