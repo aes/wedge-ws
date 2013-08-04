@@ -26,10 +26,16 @@
   (let ((p (or pos (point))))
     (eq 32 (char-syntax (aref (buffer-substring p (1+ p)) 0)))))
 
+(defun wedge-ws-continue-p (col)
+  (or (and (= (current-column) col)
+	   (ws-at-pos))
+      (and (> (current-column) col)
+	   (ws-at-pos (- (point) 1)))))
+
 (defun goto-top-of-ws-col (&optional col)
   (let* ((col (or col (current-column)))
 	 (beg (point)))
-    (while (and (not (bobp)) (or (ws-at-pos) (> (current-column) col)))
+    (while (wedge-ws-continue-p col)
       (setf beg (point))
       (forward-line -1)
       (if (not (bobp)) (move-to-column col)))
@@ -38,7 +44,7 @@
 (defun goto-bottom-of-ws-col (&optional col)
   (let* ((col (or col (current-column)))
 	 (beg (point)))
-    (while (and (not (bobp)) (or (ws-at-pos) (> (current-column) col)))
+    (while (wedge-ws-continue-p col)
       (setf beg (point))
       (forward-line 1)
       (if (not (eobp)) (move-to-column col)))
@@ -57,7 +63,7 @@
 
       (goto-top-of-ws-col)
 
-      (while (and (not (eobp)) (or (ws-at-pos) (> (current-column) col)))
+      (while (wedge-ws-continue-p col)
 	(setf beg (point))
 	(if (= (current-column) col)
 	    (if (numberp ins)
