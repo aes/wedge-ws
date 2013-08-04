@@ -1,4 +1,4 @@
-;;; wedge-ws.el --- Wedge in more whitespace in a river in the text
+;;; wedge-ws.el --- Wedge whitespace between columns in text
 
 ;; Copyright (C) 2013 Anders Eurenius <aes@spotify.com>
 
