@@ -1,11 +1,13 @@
+# Hint: narrow-to-page
+
 Feature: Wedge in whitespace in an enclosed river in the text
   I want to increase column separation
 
 Background:
   Given I am in buffer "*wedge-ws*"
   And the buffer is empty
-
-Scenario: Bounded simple increase
+
+Scenario: Simple bounded increase
   When I insert:
     """
     moophlebistre
@@ -24,8 +26,53 @@ Scenario: Bounded simple increase
     mef  gog
     cthulhu for president
     """
+
+Scenario: Simple increase without end bound
+  When I insert:
+    """
+    moophlebistre
+    cat dog
+    foo bar
+    mef gog
 
+    cthulhu for president
+    """
+  And I place the cursor before "bar"
+  And I press "C-c :"
+  Then I should see:
+    """
+    moophlebistre
+    cat  dog
+    foo  bar
+    mef  gog
 
+    cthulhu for president
+    """
+
+Scenario: Simple increase without any bound
+  When I insert:
+    """
+    moophlebistre
+
+    cat dog
+    foo bar
+    mef gog
+
+    cthulhu for president
+    """
+  And I place the cursor before "bar"
+  And I press "C-c :"
+  Then I should see:
+    """
+    moophlebistre
+
+    cat  dog
+    foo  bar
+    mef  gog
+
+    cthulhu for president
+    """
+
 Scenario: Increase snag
   When I insert:
     """
@@ -46,8 +93,7 @@ Scenario: Increase snag
     mef   gog
     boar  blef
     """
-
-
+
 Scenario: Increase vs tab
   When I insert:
     """
