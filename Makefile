@@ -9,8 +9,9 @@ test:
 	carton exec ${ECUKES} features
 
 package:
+	carton package
 	ln -s . wedge-ws-$(VERSION) || true
-	tar cvzf wedge-ws-$(VERSION).tar.gz   \
+	tar cvf wedge-ws-$(VERSION).tar       \
 	  wedge-ws-$(VERSION)/Carton          \
 	  wedge-ws-$(VERSION)/features        \
 	  wedge-ws-$(VERSION)/Makefile        \
