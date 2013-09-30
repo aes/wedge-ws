@@ -53,6 +53,7 @@
       (if (not (eobp)) (move-to-column col)))
     (goto-char beg)))
 
+;;;###autoload
 (defun wedge-ws (&optional insert)
   (save-excursion
     (let* ((beg)
@@ -78,10 +79,12 @@
 	(forward-line 1)
 	(if (not (eobp)) (move-to-column col))) )))
 
+;;;###autoload
 (defun wedge-ws-inc ()
   (interactive)
   (wedge-ws " "))
 
+;;;###autoload
 (defun wedge-ws-dec ()
   (interactive)
   (wedge-ws -1))
