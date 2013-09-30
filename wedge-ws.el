@@ -55,7 +55,8 @@
 
 (defun wedge-ws (&optional insert)
   (save-excursion
-    (let* ((origin (point))
+    (let* ((beg)
+	   (origin (point))
 	   (col (current-column))
 	   (ins (or insert " ")))
 
