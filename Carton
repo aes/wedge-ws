@@ -1,7 +1,0 @@
-(source "marmalade" "http://marmalade-repo.org/packages/")
-
-(package "wedge-ws" "0.1.1" "Wedge whitespace between columns in text")
-
-(development
-  (depends-on "ecukes")
-  (depends-on "espuds"))
