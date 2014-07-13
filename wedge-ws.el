@@ -5,7 +5,7 @@
 ;; Author: Anders Eurenius <aes@spotify.com>
 ;; Created: 2013-08-04
 ;; Keywords: formatting indentation
-;; Version: 0.1.0
+;; Version: 0.2.0
 
 ;; This file is not part of GNU Emacs.
 
@@ -21,73 +21,77 @@
 ;; See the License for the specific language governing permissions and
 ;; limitations under the License.
 
+(defun wedge-ws--ws-at-pos (&optional pos)
+  (let ((c (or (char-after (or pos (point))) ?A)))
+    (and (not (= 10 c)) (= 32 (char-syntax (or c ?A))) )))
 
-(defun ws-at-pos (&optional pos)
-  (let ((p (or pos (point))))
-    (if (not (eobp))
-	(let ((c (aref (buffer-substring p (1+ p)) 0)))
-	  (and (= 32 (char-syntax c))
-	       (not (= 10 c)))))))
-
-(defun wedge-ws-continue-p (col)
-  (or (and (= (current-column) col)
-	   (ws-at-pos))
-      (and (> (current-column) col)
-	   (ws-at-pos (- (point) 1)))))
-
-(defun goto-top-of-ws-col (&optional col)
-  (let* ((col (or col (current-column)))
-	 (beg (point)))
-    (while (wedge-ws-continue-p col)
-      (setf beg (point))
-      (forward-line -1)
-      (if (not (bobp)) (move-to-column col)))
-    (goto-char beg)))
-
-(defun goto-bottom-of-ws-col (&optional col)
-  (let* ((col (or col (current-column)))
-	 (beg (point)))
-    (while (wedge-ws-continue-p col)
-      (setf beg (point))
-      (forward-line 1)
-      (if (not (eobp)) (move-to-column col)))
-    (goto-char beg)))
-
-;;;###autoload
-(defun wedge-ws (&optional insert)
+(defun wedge-ws--ws-in-cols (beg &optional end)
   (save-excursion
-    (let* ((beg)
-	   (origin (point))
-	   (col (current-column))
-	   (ins (or insert " ")))
+    (let ((end (or end (1+ beg))))
+      (move-to-column beg)
+      (catch 'found
+	(while (< (current-column) end)
+	  (if (not (wedge-ws--ws-at-pos))
+	      (throw 'found nil))
+	  (forward-char))
+	t))))
 
-      (when (not (ws-at-pos))
-	(skip-chars-backward "^[:space:]")
-	(if (> (current-column) 0) (backward-char 1))
-	(setf col (current-column)))
+(defun wedge-ws--left-of-block ()
+  (skip-chars-forward "[:space:]")
+  (skip-chars-backward "^[:space:]")
+  (if (and (not (wedge-ws--ws-at-pos))
+	   (not (= 10 (char-before))))
+      (backward-char)))
 
-      (goto-top-of-ws-col)
 
-      (while (wedge-ws-continue-p col)
-	(setf beg (point))
-	(if (= (current-column) col)
-	    (if (numberp ins)
-		(if (< ins 0)
-		    (delete-char (- ins))
-		  (insert (make-string ins " ")))
-	      (insert ins)))
-	(forward-line 1)
-	(if (not (eobp)) (move-to-column col))) )))
+(defun wedge-ws--goto-top-of-ws-col (&optional beg end)
+  (let* ((beg (or beg (current-column)))
+	 (end (or end (1+ beg)))
+	 (cont t))
+    (while cont
+      (forward-line -1)
+      (when (bobp) (setq cont nil))
+      (when (not (wedge-ws--ws-in-cols beg end))
+        (forward-line)
+        (setq cont nil))
+      )
+    (move-to-column beg)))
 
 ;;;###autoload
 (defun wedge-ws-inc ()
   (interactive)
-  (wedge-ws " "))
+  (save-excursion
+    (wedge-ws--left-of-block)
+    (let ((beg (current-column)))
+      (wedge-ws--goto-top-of-ws-col)
+      (while (and (not (eobp)) (wedge-ws--ws-in-cols beg))
+	(move-to-column beg)
+	(if (< (current-column) (1+ beg))
+	    (insert " "))
+        (forward-line)
+	 ))))
+
+(defun wedge-ws--eat-one-space ()
+  (let ((c (current-column)))
+    (when (wedge-ws--ws-at-pos (1- (point)))
+      (delete-backward-char 1)
+      (while (< (current-column) (1- c))
+	(insert " "))
+      t)))
 
 ;;;###autoload
 (defun wedge-ws-dec ()
   (interactive)
-  (wedge-ws -1))
+  (save-excursion
+    (wedge-ws--left-of-block)
+    (forward-char)
+    (let* ((beg (- (current-column) 2))
+	   (end (current-column)))
+      (wedge-ws--goto-top-of-ws-col beg end)
+      (while (and (not (eobp)) (wedge-ws--ws-in-cols beg end))
+	(move-to-column end)
+	(wedge-ws--eat-one-space)
+        (forward-line) ))))
 
 (provide 'wedge-ws)
 

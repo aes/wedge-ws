@@ -127,3 +127,21 @@ Scenario: Increase vs end-of-line
   And I place the cursor before "gog"
   And I press "C-c :"
   Then I should not see pattern " +$"
+
+Scenario: Increase vs line-wrap
+  When I insert:
+    """
+    moophlebistre
+    mooblof gog
+    xmkdcat dog
+    xmefodo
+    """
+  And I place the cursor before "xmk"
+  And I press "C-c :"
+  Then I should not see precisely:
+    """
+    moophlebistre
+    mooblof  gog
+    xmkdcat  dog
+    xmefodo
+    """
